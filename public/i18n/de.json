@@ -1,0 +1,27 @@
+{
+    "cancel": "Abbrechen",
+    "close": "Schließen",
+
+    "displayname": "Anzeigename",
+    "settings": "Einstellungen",
+    "language": "Sprache",
+    "change_email": "E-Mail-Adresse ändern",
+    "change_password": "Passwort ändern",
+    "change_avatar": "Avatar ändern",
+    "delete_account": "Account löschen",
+
+    "email": "Email",
+    "change_email_text": "Sie erhalten eine Bestätigungs-Email an Ihre neue Email-Adresse.\nIhre aktuell eingestellte Email-Addresse bleibt bis zur Bestätigung aktiv.",
+    "change_email_now": "Jetzt ändern",
+    
+    "password": "Passwort",
+    "change_password_text": "Bitte geben Sie Ihr altes Passwort ein, um das neue Passwort zu setzen.",
+    "old_password": "Altes Passwort",
+    "new_password": "Neues Passwort",
+    "repeat_new_password": "Neues Passwort (nochmal)",
+    "change_password_now": "Jetzt ändern",
+    "password_changed": "Passwort geändert.",
+
+    "delete_account_text": "Durch das Löschen Ihres Accounts werden alle gespeicherten Daten (u.a. Profildaten, Datei-Uploads, Kommentare und Postings) von dieser Platform entfernt.\nIhre Account-Seite und Ihre Kommentare werden für andere Nutzer als “gelöscht” angezeigt.\nDies kann nicht rückgängig gemacht werden.",
+    "delete_account_now": "Jetzt löschen"
+}
