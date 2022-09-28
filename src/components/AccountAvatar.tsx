@@ -6,7 +6,7 @@ import { stringAvatar } from "../tools";
 export type MyAccountAvatarProps = AvatarProps;
 
 export const MyAccountAvatar = React.forwardRef(function MyAccountAvatar(props: MyAccountAvatarProps, ref: React.Ref<any>) {
-    const { userinfo, reason } = useSession();
+    const { userinfo, status: reason } = useSession();
 
     let avatar: JSX.Element;
 

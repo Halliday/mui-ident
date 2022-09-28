@@ -1,5 +1,5 @@
 import { RestError } from "@halliday/rest";
-import { ArrowBack, Close, CloseOutlined, EditOutlined, NavigateNextOutlined } from "@mui/icons-material";
+import { ArrowBack, CheckCircle, Close, CloseOutlined, EditOutlined, MarkEmailUnreadOutlined, NavigateNextOutlined } from "@mui/icons-material";
 import { Alert, AlertTitle, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogProps, IconButton, InputAdornment, List, ListItemButton, ListItemIcon, ListItemText, Slide, SlideProps, Stack, styled, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
 import { L } from "../i18n";
@@ -49,7 +49,11 @@ export function MyProfilePanel(props: MyProfilePanelProps) {
     const [previousTab, setPreviousTab] = useState(props.defaultTab ?? "profile");
     const [tab, setTab] = useState(props.defaultTab ?? "profile");
 
+    const {userinfo} = useSession();
+
     const boxRef = React.useRef<HTMLElement>(null);
+
+    if(!userinfo) return null;
 
     function handleTabChange(ev: {}, newTab: LoginPanelTab) {
         setPreviousTab(tab);
@@ -154,6 +158,7 @@ const ProfileTab = React.forwardRef((props: TabProps, ref: React.Ref<HTMLDivElem
                     </IconButton>
                 </Box>
             </Stack>
+            { !userinfo!.email_verified && <Alert severity="warning" sx={{ mb: 2 }}>{L("email_not_verified")}</Alert> }
             {
                 editName ? (
                     <Form id="preferred_username" onSubmit={preventDefault}>
@@ -191,8 +196,6 @@ const ProfileTab = React.forwardRef((props: TabProps, ref: React.Ref<HTMLDivElem
 });
 
 ////////////////////////////////////////////////////////////////////////////////
-
-const Label = styled("label")({});
 
 const SettingsTab = React.forwardRef((props: TabProps, ref: React.Ref<HTMLDivElement>) => {
     const onTabChange = props.onTabChange;

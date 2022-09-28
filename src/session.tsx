@@ -1,20 +1,24 @@
 
-import { api, defaultKey, getPasswordResetEmail, instructPasswordReset, loadSession, login, NewUser, register, requiresPasswordReset, resetPassword, Session, Userinfo } from "@halliday/ident";
+import { api, defaultKey, getEmailHint, instructPasswordReset, loadSession, login, NewUser, register, resetPassword, Session, Status as IdentStatus, Userinfo } from "@halliday/ident";
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 export type SessionInteraction = "reset-password" | string;
+
+export type SessionStatus = IdentStatus | "loading" | "loading-failed" | "register" | "logout" | "update-self"
+
+export type SessionDispatcher = (arg: [sess: Session | null, status: SessionStatus]) => void;
 
 class SessionWrapper {
     constructor(
         public readonly sessionKey: string,
         public readonly session: Session | null,
-        public readonly reason: string,
-        private readonly setSession: (arg: [sess: Session | null, reason: string]) => void
+        public readonly status: SessionStatus,
+        private readonly setSession: SessionDispatcher
     ) {}
 
     login = async (username: string, password: string) => {
-        const sess = await login(username, password, this.sessionKey);
-        this.setSession([sess, "login"]);
+        const [sess, status] = await login(username, password, this.sessionKey);
+        this.setSession([sess, status]);
     }
 
     get userinfo(): Userinfo | null {
@@ -33,14 +37,12 @@ class SessionWrapper {
         this.setSession([null, "logout"]);
     }
 
-    get requiredInteraction(): SessionInteraction | undefined {
-        if (requiresPasswordReset()) {
-            return "reset-password";
-        }
+    get getEmailHint() {
+        return getEmailHint();
     }
 
-    get passwordResetEmail() {
-        return getPasswordResetEmail();
+    get requiresLogin()  {
+        return this.status === "login-for-registration-required" || this.status === "login-for-email-confirmation-required";
     }
 
     async instructPasswordReset(email: string) {
@@ -53,8 +55,6 @@ class SessionWrapper {
     }
 
     async resetPassword(newPassword: string) {
-        if (!requiresPasswordReset())
-            throw new Error("Password reset not available.");
         await resetPassword(newPassword);
     }
 
@@ -72,7 +72,8 @@ class SessionWrapper {
     register = async (user: NewUser, password: string) => {
         if (!user.email) throw new Error("Email is required.");
         await register(user, password);
-        await this.login(user.email, password);
+        const [sess, status] = await login(user.email!, password, this.sessionKey);
+        this.setSession([sess, "register"]);
     }
 
     deleteUser = async() => {
@@ -94,19 +95,22 @@ export interface SessionProviderProps {
 
 export const SessionContext = createContext<SessionWrapper | null>(null);
 
+let sess: Promise<[sess: Session | null, status: IdentStatus]> | null;
+
 export function SessionProvider(props: SessionProviderProps) {
     const { sessionKey = defaultKey, children } = props;
 
-    const [[session, reason], setSession] = useState<[Session | null, string]>([null, "loading"]);
+    const [[session, status], setSession] = useState<[Session | null, SessionStatus]>([null, "loading"]);
 
     useEffect(() => {
-        loadSession(sessionKey).then(setSession, (err) => {
+        if (!sess) sess = loadSession(sessionKey);
+        sess.then(setSession, (err) => {
             console.error("Error loading session:", err);
-            setSession([null, "error"]);
+            setSession([null, "loading-failed"]);
         });
     }, [sessionKey]);
 
-    const wrapper = useMemo(() => new SessionWrapper(sessionKey, session, reason, setSession), [session, reason]);
+    const wrapper = useMemo(() => new SessionWrapper(sessionKey, session, status, setSession), [session, status]);
 
     return <SessionContext.Provider value={wrapper} children={children} />;
 }

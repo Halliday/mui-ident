@@ -11,6 +11,7 @@
     "delete_account": "Delete account",
 
     "email": "Email",
+    "email_not_verified": "Email not verified",
     "change_email_text": "Sie erhalten eine Bestätigungs-Email an Ihre neue Email-Adresse.\nIhre aktuell eingestellte Email-Addresse bleibt bis zur Bestätigung aktiv.",
     "change_email_now": "Change now",
     

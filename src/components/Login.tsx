@@ -1,13 +1,15 @@
-import { getPasswordResetEmail, instructPasswordReset, resetPassword, socialLoginUri } from "@halliday/ident";
+import { api, getEmailHint, instructPasswordReset, resetPassword, socialLoginUri } from "@halliday/ident";
 import { ArrowBack, Close } from "@mui/icons-material";
-import { Alert, AlertTitle, BoxProps, Dialog, DialogContent, DialogProps, IconButton, Link, styled, TextField, Typography, useTheme } from "@mui/material";
-import React, { useState } from "react";
+import { Alert, AlertTitle, BoxProps, Button, Dialog, DialogContent, DialogProps, IconButton, Link, Stack, styled, TextField, Typography, useTheme } from "@mui/material";
+import React, { useEffect, useState } from "react";
 // import { useLanguage } from "../i18n";
 import { useSession } from "../session";
 import { delay } from "../tools";
 import DividerWithLabel from "./DividerWithLabel";
 import { ErrorView } from "./ErrorView";
 import LoadingButton from "./LoadingButton";
+import SignInWithGoogle from "./sign-in-with/Google";
+import SignInWithWaziup from "./sign-in-with/Waziup";
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -54,9 +56,9 @@ export function LoginPanel(props: LoginPanelProps) {
 
     // const lang = useLanguage();
 
-    const { requiredInteraction, login, register, logout, reason } = useSession();
+    const { login, register, logout, status } = useSession();
 
-    const [tab, setTab] = useState<LoginPanelTab>(requiredInteraction === "reset-password" ? "complete-reset-password" : "login");
+    const [tab, setTab] = useState<LoginPanelTab>(status === "password-reset-required" ? "complete-reset-password" : "login");
 
     function changeTab(tab: LoginPanelTab) {
         setTab(tab);
@@ -69,7 +71,7 @@ export function LoginPanel(props: LoginPanelProps) {
     const [resetted, setResetted] = useState(false);
     const [resetCompleted, setResetCompleted] = useState(false);
 
-    const [email, setEmail] = useState("");
+    const [email, setEmail] = useState(getEmailHint() || "");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [username, setUsername] = useState("");
@@ -202,19 +204,20 @@ export function LoginPanel(props: LoginPanelProps) {
         setResetted(true);
     }
 
-    async function performSocialLogin(iss: string) {
-        window.location.href = socialLoginUri(iss);
-    }
-
-    const socialSigin = <>
-        <DividerWithLabel>or</DividerWithLabel>
-        {/* <img src={btnGoogleSigninLightNormalWeb} onClick={() => performSocialLogin("https://login.waziup.io/auth/realms/waziup")} alt="Sign in with Google" /> */}
-    </>;
-
     let body: JSX.Element;
     switch (tab) {
         case "login":
             body = <>
+                {
+                    status === "login-for-email-confirmation-required" && <Alert severity="info" sx={{ mb: 3 }}>
+                        Please login to confirm your email address.
+                    </Alert>
+                }
+                {
+                    status === "login-for-registration-required" && <Alert severity="info" sx={{ mb: 3 }}>
+                        Please login to confirm your email address.
+                    </Alert>
+                }
                 <Form id="login" sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, mb: 5 }}>
                     <TextField label="Email" id="email" autoComplete="email" autoFocus fullWidth value={email} onChange={ev => { setEmail(ev.target.value); }} disabled={loading} error={showErrors && emailError} helperText={emailHelperText} />
                     <TextField label="Password" id="password" type="password" autoComplete="current-password" fullWidth value={password} onChange={ev => { setPassword(ev.target.value); }} disabled={loading} />
@@ -225,7 +228,7 @@ export function LoginPanel(props: LoginPanelProps) {
                         You can now login with your new password.
                     </Alert>
                 }
-                {reason === "logout" && (
+                {status === "logout" && (
                     <Alert severity="info" sx={{ mb: 3 }}>
                         Logout successfull.
                     </Alert>
@@ -236,7 +239,7 @@ export function LoginPanel(props: LoginPanelProps) {
                     <span>•</span>
                     <TextButton role="button" onClick={() => changeTab("reset-password")}>Forgot password?</TextButton>
                 </Typography>
-                {socialSigin}
+                <SignInWith />
             </>;
             break;
         case "register":
@@ -266,7 +269,7 @@ export function LoginPanel(props: LoginPanelProps) {
                         Check your mails for a mail from us, and click the link inside the mail to complete the registration.
                     </Alert>
                 }
-                {socialSigin}
+                <SignInWith />
             </>
             break;
         case "reset-password":
@@ -282,13 +285,13 @@ export function LoginPanel(props: LoginPanelProps) {
                         Check your mails for a mail from us, and click the link inside the mail to continue.
                     </Alert>
                 }
-                {socialSigin}
+                <SignInWith />
             </>;
             break;
         case "complete-reset-password":
             body = <>
                 <Form id="complete-reset-password" sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, mb: 5 }}>
-                    <TextField label="Email" id="email" type="email" autoComplete="email" fullWidth disabled value={getPasswordResetEmail()} />
+                    <TextField label="Email" id="email" type="email" autoComplete="email" fullWidth disabled value={getEmailHint()} />
                     <TextField label="Password" id="new-password" type="password" autoComplete="new-password" fullWidth disabled={loading || resetCompleted} value={password} onChange={ev => { setPassword(ev.target.value); }} error={showErrors && passwordError} helperText={passwordHelperText} />
                     <TextField label="Confirm Password" id="confirm-new-password" type="password" autoComplete="new-password" fullWidth disabled={loading || resetCompleted} value={confirmPassword} onChange={ev => { setConfirmPassword(ev.target.value); }} error={showErrors && confirmPasswordError} helperText={confirmPasswordHelperText} />
                     {!resetCompleted && <LoadingButton size="large" variant="contained" disableElevation disabled={loading} loading={loading} onClick={handleResetPasswordClick}>Change Password</LoadingButton>}
@@ -306,4 +309,48 @@ export function LoginPanel(props: LoginPanelProps) {
         <DialogContent>{body}</DialogContent>
         <IconButton sx={{ position: "absolute", right: 8, top: 8 }} onClick={handleCloseClick}><Close /></IconButton>
     </>;
+}
+
+
+var globalSocialProviders: Promise<api.SocialProvider[]>;
+
+function SignInWith() {
+    const [socialProviders, setSocialProviders] = useState<api.SocialProvider[]>([]);
+    useEffect(() => {
+        if (globalSocialProviders === undefined) {
+            globalSocialProviders = api.socialProviders();
+        }
+        globalSocialProviders.then(setSocialProviders);
+    }, []);
+    return <>
+        {socialProviders.length > 0 && <DividerWithLabel>or</DividerWithLabel>}
+        <Stack spacing={1} alignItems="center">
+            {socialProviders.map(socialProvider)}
+        </Stack>
+    </>
+}
+
+function socialProvider(p: api.SocialProvider): React.ReactNode {
+
+    async function performSocialLogin() {
+        window.location.href = socialLoginUri(p.iss);
+    }
+
+    const props = {
+        onClick: performSocialLogin,
+        key: p.iss,
+    } as const;
+
+    switch (p.iss) {
+        case "https://accounts.google.com":
+            // https://accounts.google.com/.well-known/openid-configuration
+            return <SignInWithGoogle {...props} />;
+
+        case "https://login.waziup.io/auth/realms/waziup":
+            // https://login.waziup.io/auth/realms/waziup/.well-known/openid-configuration
+            return <SignInWithWaziup {...props} />
+
+        default:
+            return <Button variant="outlined" {...props}>{new URL(p.iss).hostname}</Button>;
+    }
 }

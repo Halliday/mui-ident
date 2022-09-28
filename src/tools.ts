@@ -4,7 +4,7 @@
 
 import { AvatarProps, SxProps, Theme } from "@mui/material";
 import { SystemStyleObject } from "@mui/system";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 // see https://mui.com/material-ui/react-avatar/#BackgroundLetterAvatars.tsx
 export function stringAvatar(name: string): AvatarProps {
@@ -80,3 +80,40 @@ export function joinSx(a: SystemStyleObject<Theme>, b?: SxProps<Theme>): SxProps
     if (Array.isArray(b)) return [a, ...b];
     return [a, b as | SystemStyleObject<Theme> | ((theme: Theme) => SystemStyleObject<Theme>)];
 }
+
+// type GlobalStateKey = number;
+
+// var globalStateKeyCounter: GlobalStateKey = 0;
+
+// export function globalStateKey(): GlobalStateKey {
+//     globalStateKeyCounter++;
+//     return globalStateKeyCounter;
+// }
+
+// const globalStates = new Map<GlobalStateKey, [any, Dispatch<SetStateAction<any>>, Set<(s: any) => void>]>();
+
+// export function useGlobalState<S>(key: GlobalStateKey, initialState: S | (() => S)): [S, Dispatch<SetStateAction<S>>] {
+//     const [state, setState] = useState(() => {
+//         let v = globalStates.get(key);
+//         if(v) return v[0];
+//         const s = initialState instanceof Function ? initialState() : initialState;
+//         globalStates.set(key, [s, setState]);
+//     });
+
+//     const v = globalStates.get(key)!;
+//     useEffect(() => {
+
+//     }, []);
+//     return [v[0], v[1]];
+//     // if (v) return v;
+//     // v = [
+//     //     typeof initialState === "function" ? (initialState as () => S)() : initialState,
+//     //     (s: SetStateAction<S>) => {
+//     //         if (typeof s === "function") {
+//     //             v![0] = (s as (s: S) => S)(v![0]);
+//     //         } else {
+//     //            v[0] = s;
+//     //         }
+//     //     }
+//     // ]
+// }
