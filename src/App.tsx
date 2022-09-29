@@ -2,10 +2,11 @@ import { AppBar, Box, Button, CircularProgress, Container, createTheme, Paper, T
 import React, { useEffect, useState } from 'react';
 import { MyAccountAvatar } from './components/AccountAvatar';
 import { LoginDialog, LoginPanel } from './components/Login';
-import { msgBox } from './components/MsgBox';
 import { MyProfileDialog, MyProfilePanel } from './components/Profile';
-import { showToast } from './components/Toast';
 import { useSession } from './session';
+import { MsgBox } from "@halliday/mui-msgbox";
+import { toast } from "@halliday/mui-toast";
+
 
 const theme = createTheme({
   typography: {
@@ -51,84 +52,57 @@ function App() {
   }
 
   useEffect(() => {
-    console.log("Session Status", status);
-
     switch (status) {
       case "login":
-        showToast("Login successfull.");
+        toast("Login successfull.");
         break;
       case "register":
-        msgBox({
+        MsgBox({
           title: "You've Got Mail!",
           text: "Check your mails for a mail from us, and click the link inside the mail to complete the registration.",
         });
         break;
       case "logout":
-        showToast("Logout successfull.");
+        toast("Logout successfull.");
         break;
       case "revoked":
-        showToast("Sitzung wurde beended. Bitte erneut anmelden!");
+        toast("Sitzung wurde beended. Bitte erneut anmelden!");
         break;
       case "registration-completed":
-        msgBox({
+        MsgBox({
           title: "Registration successfull",
           text: "Thanks for verifying your email address.",
         });
         break;
       case "social-login-exchanged":
-        showToast("Login successfull.");
+        toast("Login successfull.");
         break;
       case "registration-failed":
-        msgBox({
+        MsgBox({
           title: "Registration failed",
           text: "This link is probably expired or was already used. Please try again.",
         });
         break;
       case "social-login-exchanged":
-        msgBox({
+        MsgBox({
           title: "Login failed",
           text: "This link is probably expired or was already used. Please try again.",
         });
         break;
       case "email-confirmed":
-        msgBox({
+        MsgBox({
           title: "Email verified",
           text: "Thanks for verifying your email address.",
         });
         break;
       case "email-confirmation-failed":
-        msgBox({
+        MsgBox({
           title: "Email change failed",
           text: "This link is probably expired or was already used. Please try again.",
         });
         break;
     }
   }, [status]);
-
-  // let content: JSX.Element;
-  // if (status === "loading") {
-
-  //   content = <CircularProgress />;
-  // } else {
-  //   content = <>
-
-  //   </>
-
-  //   // if (session) {
-  //   //   content = <>
-  //   //     <Paper sx={{ width: 350, position: "relative" }}>
-  //   //       <MyProfilePanel />
-  //   //     </Paper>
-  //   //   </>
-  //   // } else {
-
-  //   //   content = <>
-  //   //     <Paper sx={{ width: 350, position: "relative" }}>
-  //   //       <LoginPanel />
-  //   //     </Paper>
-  //   //   </>
-  //   // }
-  // }
 
   return (
     <ThemeProvider theme={theme}>
@@ -147,7 +121,7 @@ function App() {
         ) : (
           <Container maxWidth="md" sx={{ pt: "20vh", color: "text.secondary" }}>
             <Typography variant="h2">Login required</Typography>
-            <Typography>This demo requires you to login by clicking the "Login" button on the top right cornor.</Typography>
+            <Typography>This demo requires you to login by clicking the "Login" button at the top right corner.</Typography>
           </Container>
         )}
 
@@ -169,7 +143,7 @@ function MySession() {
     ["Issued At", session.issuedAt.toLocaleString()],
     ["Expires At", session.expiresAt.toLocaleString()],
     ["Id Token", session.idToken],
-    ["Userinfo", <ul>{Object.entries(session.userinfo).map(([k, v]) => (<li><strong>{k}:</strong> {JSON.stringify(v)}</li>))}</ul>],
+    ["Userinfo", <ul>{Object.entries(session.userinfo).map(([k, v]) => (<li key={k}><strong>{k}:</strong> {JSON.stringify(v)}</li>))}</ul>],
   ];
   return <Container maxWidth="lg" sx={{ pt: "5vh" }}>
     <Typography variant="h2" gutterBottom>Session</Typography>
@@ -177,7 +151,7 @@ function MySession() {
       <Table aria-label="My Session">
         <TableHead>
           <TableRow>
-            <TableCell sx={{whiteSpace: "nowrap"}}>Key</TableCell>
+            <TableCell sx={{ whiteSpace: "nowrap" }}>Key</TableCell>
             <TableCell>Value</TableCell>
           </TableRow>
         </TableHead>
@@ -187,8 +161,8 @@ function MySession() {
               key={row[0]}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
-              <TableCell component="th" scope="row" sx={{whiteSpace: "nowrap"}}>{row[0]}</TableCell>
-              <TableCell><Box sx={{wordBreak: "break-all", whiteSpace: "pre-line", }}>{row[1]}</Box></TableCell>
+              <TableCell component="th" scope="row" sx={{ whiteSpace: "nowrap" }}>{row[0]}</TableCell>
+              <TableCell><Box sx={{ wordBreak: "break-all", whiteSpace: "pre-line", }}>{row[1]}</Box></TableCell>
             </TableRow>
           ))}
         </TableBody>

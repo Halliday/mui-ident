@@ -1,17 +1,17 @@
+import { MsgBox } from "@halliday/mui-msgbox";
+import { toast } from "@halliday/mui-toast";
 import { RestError } from "@halliday/rest";
-import { ArrowBack, CheckCircle, Close, CloseOutlined, EditOutlined, MarkEmailUnreadOutlined, NavigateNextOutlined } from "@mui/icons-material";
+import { ArrowBack, Close, CloseOutlined, EditOutlined, NavigateNextOutlined } from "@mui/icons-material";
 import { Alert, AlertTitle, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogProps, IconButton, InputAdornment, List, ListItemButton, ListItemIcon, ListItemText, Slide, SlideProps, Stack, styled, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
-import { L } from "../i18n";
+import { L } from "@halliday/react-i18n";
 import { useSession } from "../session";
 import { MyAccountAvatar } from "./AccountAvatar";
 import { SelectLanguage } from "./Language";
-import { msgBox, showError } from "./MsgBox";
-import { showToast } from "./Toast";
 
 
 
-interface MyProfileDialogProps extends DialogProps {
+export interface MyProfileDialogProps extends DialogProps {
     onClose?: (ev: {}, reason: "backdropClick" | "escapeKeyDown" | "closeButtonClick" | "logout" | "password-changed" | "email-changed" | "user-deleted") => void
 }
 
@@ -19,27 +19,27 @@ export function MyProfileDialog(props: MyProfileDialogProps) {
     const { onClose } = props;
 
     function handleCloseClick(ev: React.MouseEvent) {
-       onClose?.(ev, "closeButtonClick")
+        onClose?.(ev, "closeButtonClick")
     }
 
     return <Dialog {...props} fullWidth PaperProps={{ sx: { maxWidth: 350 } }}>
-        
+
         <IconButton sx={{ position: "absolute", right: 8, top: 8, zIndex: 1 }} onClick={handleCloseClick}><Close /></IconButton>
         <MyProfilePanel onClose={onClose} />
     </Dialog>
 }
 
-interface MyProfilePanelProps {
+export interface MyProfilePanelProps {
     onClose?: (ev: {}, reason: "closeButtonClick" | "logout" | "password-changed" | "email-changed" | "user-deleted") => void,
-    defaultTab?: LoginPanelTab
+    defaultTab?: ProfilePanelTab
 }
 
 interface TabProps {
     onClose?: (ev: {}, reason: "closeButtonClick" | "logout" | "password-changed" | "email-changed" | "user-deleted") => void,
-    onTabChange: (ev: {}, tab: LoginPanelTab) => void
+    onTabChange: (ev: {}, tab: ProfilePanelTab) => void
 }
 
-type LoginPanelTab = "profile" | "delete-account" | "change-password" | "change-email" | "settings";
+export type ProfilePanelTab = "profile" | "delete-account" | "change-password" | "change-email" | "settings";
 
 const Form = styled("form")({});
 
@@ -47,15 +47,15 @@ export function MyProfilePanel(props: MyProfilePanelProps) {
     const { onClose } = props;
 
     const [previousTab, setPreviousTab] = useState(props.defaultTab ?? "profile");
-    const [tab, setTab] = useState(props.defaultTab ?? "profile");
+    const [tab, setTab] = useState<ProfilePanelTab>(props.defaultTab ?? "profile");
 
-    const {userinfo} = useSession();
+    const { userinfo } = useSession();
 
     const boxRef = React.useRef<HTMLElement>(null);
 
-    if(!userinfo) return null;
+    if (!userinfo) return null;
 
-    function handleTabChange(ev: {}, newTab: LoginPanelTab) {
+    function handleTabChange(ev: {}, newTab: ProfilePanelTab) {
         setPreviousTab(tab);
         setTab(newTab);
     }
@@ -65,7 +65,7 @@ export function MyProfilePanel(props: MyProfilePanelProps) {
         onClose: onClose
     }
 
-    const slideProps = (t: LoginPanelTab): Partial<SlideProps> => ({
+    const slideProps = (t: ProfilePanelTab): Partial<SlideProps> => ({
         appear: false,
         in: tab === t,
         mountOnEnter: true,
@@ -111,7 +111,7 @@ const ProfileTab = React.forwardRef((props: TabProps, ref: React.Ref<HTMLDivElem
         const input = ev.target as HTMLInputElement;
         const preferred_username = input.value;
         if (ev.key === "Enter") {
-            msgBox({
+            MsgBox({
                 title: "Change Displayname",
                 text: "Do you want to change your displayname?",
                 handleYes: () => {
@@ -121,9 +121,9 @@ const ProfileTab = React.forwardRef((props: TabProps, ref: React.Ref<HTMLDivElem
                         // sess!.store();
                         setEditName(false);
                         // setSession(sess!, "updated");
-                        showToast("Displayname changed.");
+                        toast("Displayname changed.");
                     }, (err) => {
-                        showError(err);
+                        reportError(err);
                     });
                 },
                 handleCancel: () => { },
@@ -158,7 +158,7 @@ const ProfileTab = React.forwardRef((props: TabProps, ref: React.Ref<HTMLDivElem
                     </IconButton>
                 </Box>
             </Stack>
-            { !userinfo!.email_verified && <Alert severity="warning" sx={{ mb: 2 }}>{L("email_not_verified")}</Alert> }
+            {!userinfo!.email_verified && <Alert severity="warning" sx={{ mb: 2 }}>{L("email_not_verified")}</Alert>}
             {
                 editName ? (
                     <Form id="preferred_username" onSubmit={preventDefault}>
@@ -248,7 +248,7 @@ const TabChangeEmail = React.forwardRef((props: TabProps, ref: React.Ref<HTMLDiv
         try {
             await instructEmailChange(newEmail);
         } catch (err) {
-            showError(err);
+            reportError(err);
             return
         } finally {
             setLoading(false);
@@ -305,13 +305,13 @@ const TabChangePassword = React.forwardRef((props: TabProps, ref: React.Ref<HTML
                     return
                 }
             }
-            await showError(err);
+            await reportError(err);
             return
         }
         finally {
             setLoading(false);
         }
-        showToast(L("password_changed"));
+        toast(L("password_changed"));
         onClose?.({}, "password-changed");
     }
 
@@ -342,7 +342,7 @@ const TabChangePassword = React.forwardRef((props: TabProps, ref: React.Ref<HTML
 const TabDeleteAccount = React.forwardRef((props: TabProps, ref: React.Ref<HTMLDivElement>) => {
     const { onClose } = props;
     const [loading, setLoading] = useState(false);
-    const {deleteUser} = useSession();
+    const { deleteUser } = useSession();
 
     const handleSubmit = async (ev: React.SyntheticEvent) => {
         ev.preventDefault();
@@ -350,12 +350,12 @@ const TabDeleteAccount = React.forwardRef((props: TabProps, ref: React.Ref<HTMLD
         try {
             await deleteUser();
         } catch (err) {
-            showError(err);
+            reportError(err);
             return
         } finally {
             setLoading(false);
         }
-        showToast(L("password_changed"));
+        toast(L("password_changed"));
         onClose?.({}, "user-deleted");
     }
 

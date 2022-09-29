@@ -2,7 +2,7 @@ import { ArrowDropDown } from "@mui/icons-material";
 import { Button, ButtonProps, ListItemIcon, ListItemText, Menu } from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 import React, { useState } from "react";
-import { setLanguage, useLanguage } from "../i18n";
+import { setLanguage, useLanguage } from "@halliday/react-i18n";
 
 interface SelectLanguageProps extends ButtonProps {
 

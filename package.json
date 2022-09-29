@@ -3,12 +3,14 @@
   "version": "0.1.0",
   "main": "lib/main.js",
   "types": "lib/main.d.ts",
-  "dependencies": {
-  },
   "devDependencies": {
     "@emotion/react": "^11.10.4",
     "@emotion/styled": "^11.10.4",
-    "@halliday/ident": "^1.1.0",
+    "@halliday/ident": "^1.1.2",
+    "@halliday/mui-msgbox": "^1.3.1",
+    "@halliday/mui-toast": "^1.1.1",
+    "@halliday/rest": "^1.0.0",
+    "@mui/icons-material": "^5.10.6",
     "@mui/material": "^5.10.6",
     "@types/node": "^16.11.59",
     "@types/react": "^18.0.21",
@@ -16,16 +18,16 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
-    "typescript": "^4.8.3",
-    "@halliday/rest": "^1.0.0",
-    "@mui/icons-material": "^5.10.6"
+    "typescript": "^4.8.3"
   },
   "peerDependencies": {
-    "@halliday/ident": "^1.1.0",
-    "@mui/material": "^5.10.6",
-    "@halliday/rest": "^1.0.0",
-    "@mui/icons-material": "^5.10.6",
-    "react": "^18.2.0"
+    "@halliday/ident": "^1.0.0",
+    "@halliday/mui-msgbox": "^1.0.0",
+    "@halliday/mui-toast": "^1.0.0",
+    "@halliday/react-i18n": "^2.0.0",
+    "@mui/icons-material": "^5.0.0",
+    "@mui/material": "^5.0.0",
+    "react": "^18.0.0"
   },
   "scripts": {
     "start": "react-scripts start",

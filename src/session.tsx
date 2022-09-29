@@ -8,7 +8,7 @@ export type SessionStatus = IdentStatus | "loading" | "loading-failed" | "regist
 
 export type SessionDispatcher = (arg: [sess: Session | null, status: SessionStatus]) => void;
 
-class SessionWrapper {
+export class SessionWrapper {
     constructor(
         public readonly sessionKey: string,
         public readonly session: Session | null,
