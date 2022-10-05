@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 
 export type SessionInteraction = "reset-password" | string;
 
-export type SessionStatus = IdentStatus | "loading" | "loading-failed" | "register" | "logout" | "update-self"
+export type SessionStatus = IdentStatus | "loading" | "loading-failed" | "register" | "logout" | "update-self" | "user-deleted" | "user-deletion-failed";
 
 export type SessionDispatcher = (arg: [sess: Session | null, status: SessionStatus]) => void;
 
@@ -78,7 +78,14 @@ export class SessionWrapper {
 
     deleteUser = async() => {
         if (!this.session) throw new Error("Not logged in.");
-        await api.deleteUsersSelf();
+        this.session.delete();
+        try {
+            await this.session.deleteSelf();
+        } catch(err) {
+            this.setSession([null, "user-deletion-failed"]);
+            throw err;
+        }
+        this.setSession([null, "user-deleted"]);
     }
 }
 

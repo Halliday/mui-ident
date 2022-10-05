@@ -1,5 +1,5 @@
 import { AppBar, Box, Button, CircularProgress, Container, createTheme, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Toolbar, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useReducer, useState } from 'react';
 import { MyAccountAvatar } from './components/AccountAvatar';
 import { LoginDialog, LoginPanel } from './components/Login';
 import { MyProfileDialog, MyProfilePanel } from './components/Profile';
@@ -134,7 +134,13 @@ function App() {
 
 
 function MySession() {
-  const { session } = useSession();
+  const { session, logout } = useSession();
+  const forceUpdate = useForceUpdate();
+
+  function refreshSession() {
+    session!.refresh().then(forceUpdate);
+  }
+
   if (!session) return null;
   const rows: [string, React.ReactNode][] = [
     ["Access Token", session.accessToken],
@@ -168,7 +174,16 @@ function MySession() {
         </TableBody>
       </Table>
     </TableContainer>
+    <Box sx={{ pt: 2, display: "flex", gap: 1}}>
+      <Button variant="outlined" onClick={() => logout()}>Logout</Button>
+      <Button onClick={refreshSession}>Refresh</Button>
+    </Box>
   </Container>
+}
+
+function useForceUpdate() {
+  const [value, setValue] = useState(0);
+  return useMemo(() => () => setValue(value + 1), [value]);
 }
 
 export default App;

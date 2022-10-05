@@ -24,5 +24,6 @@
     "password_changed": "Password changed.",
 
     "delete_account_text": "Durch das Löschen Ihres Accounts werden alle gespeicherten Daten (u.a. Profildaten, Datei-Uploads, Kommentare und Postings) von dieser Platform entfernt.\nIhre Account-Seite und Ihre Kommentare werden für andere Nutzer als “gelöscht” angezeigt.\nDies kann nicht rückgängig gemacht werden.",
-    "delete_account_now": "Delete now"
+    "delete_account_now": "Delete now",
+    "account_delete": "Account deleted"
 }
