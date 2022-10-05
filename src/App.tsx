@@ -6,6 +6,7 @@ import { MyProfileDialog, MyProfilePanel } from './components/Profile';
 import { useSession } from './session';
 import { MsgBox } from "@halliday/mui-msgbox";
 import { toast } from "@halliday/mui-toast";
+import { loadSession } from '@halliday/ident';
 
 
 const theme = createTheme({
@@ -120,7 +121,7 @@ function App() {
           <MySession />
         ) : (
           <Container maxWidth="md" sx={{ pt: "20vh", color: "text.secondary" }}>
-            <Typography variant="h2">Login required</Typography>
+            <Typography variant="h2" gutterBottom>Login required</Typography>
             <Typography>This demo requires you to login by clicking the "Login" button at the top right corner.</Typography>
           </Container>
         )}

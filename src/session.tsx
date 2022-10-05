@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 
 export type SessionInteraction = "reset-password" | string;
 
-export type SessionStatus = IdentStatus | "loading" | "loading-failed" | "register" | "logout" | "update-self" | "user-deleted" | "user-deletion-failed";
+export type SessionStatus = IdentStatus | "register" | "logout" | "update-self" | "user-deleted" | "user-deletion-failed";
 
 export type SessionDispatcher = (arg: [sess: Session | null, status: SessionStatus]) => void;
 
@@ -98,24 +98,26 @@ export function useSession(): SessionWrapper {
 export interface SessionProviderProps {
     children: React.ReactNode;
     sessionKey?: string;
+    defaultSession: Session | null;
+    defaultStatus: SessionStatus;
 }
 
 export const SessionContext = createContext<SessionWrapper | null>(null);
 
-let sess: Promise<[sess: Session | null, status: IdentStatus]> | null;
+// let sess: Promise<[sess: Session | null, status: IdentStatus]> | null;
 
 export function SessionProvider(props: SessionProviderProps) {
-    const { sessionKey = defaultKey, children } = props;
+    const { sessionKey = defaultKey, defaultSession, defaultStatus, children } = props;
 
-    const [[session, status], setSession] = useState<[Session | null, SessionStatus]>([null, "loading"]);
+    const [[session, status], setSession] = useState<[Session | null, SessionStatus]>([defaultSession, defaultStatus]);
 
-    useEffect(() => {
-        if (!sess) sess = loadSession(sessionKey);
-        sess.then(setSession, (err) => {
-            console.error("Error loading session:", err);
-            setSession([null, "loading-failed"]);
-        });
-    }, [sessionKey]);
+    // useEffect(() => {
+    //     if (!sess) sess = loadSession(sessionKey);
+    //     sess.then(setSession, (err) => {
+    //         console.error("Error loading session:", err);
+    //         setSession([null, "loading-failed"]);
+    //     });
+    // }, [sessionKey]);
 
     const wrapper = useMemo(() => new SessionWrapper(sessionKey, session, status, setSession), [session, status]);
 

@@ -1,4 +1,4 @@
-import { api } from "@halliday/ident";
+import { api, loadSession, Session, Status } from "@halliday/ident";
 import { MsgBoxContainer } from '@halliday/mui-msgbox';
 import { ToastContainer } from '@halliday/mui-toast';
 import { config as i18nConfig, LanguageGuard, loadLanguage } from '@halliday/react-i18n';
@@ -15,10 +15,22 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
-loadLanguage().then(() => {
+Promise.allSettled([
+  loadSession(),
+  loadLanguage()
+]).then(([promisedSess]) => {
+
+  let defaultSession: Session | null = null;
+  let defaultStatus: Status = "no-session";
+  if (promisedSess.status === "fulfilled") {
+    const [sess, status] = promisedSess.value;
+    defaultSession = sess;
+    defaultStatus = status;
+  }
+
   root.render(
     <React.StrictMode>
-      <SessionProvider>
+      <SessionProvider defaultSession={defaultSession} defaultStatus={defaultStatus}>
         <LanguageGuard>
           <App />
           <MsgBoxContainer />

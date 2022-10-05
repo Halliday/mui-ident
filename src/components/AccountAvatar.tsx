@@ -1,4 +1,4 @@
-import { Avatar, AvatarProps, Skeleton } from "@mui/material";
+import { Avatar, AvatarProps } from "@mui/material";
 import React from "react";
 import { useSession } from "../session";
 import { stringAvatar } from "../tools";
@@ -10,10 +10,7 @@ export const MyAccountAvatar = React.forwardRef(function MyAccountAvatar(props: 
 
     let avatar: JSX.Element;
 
-    if (reason === "loading") {
-        avatar = <Skeleton variant="circular" width={40} height={40} />;
-
-    } if (userinfo) {
+    if (userinfo) {
         const name = userinfo.preferred_username || userinfo.email;
         if (userinfo.picture) {
             avatar = <Avatar {...props} ref={ref} alt={name} src={userinfo.picture} />;
