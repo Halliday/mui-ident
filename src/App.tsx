@@ -37,7 +37,7 @@ function App() {
 
   const { session, status } = useSession();
 
-  const [loginOpen, setLoginOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(status === "password-reset-required" || status === "login-for-registration-required" || status === "login-for-email-confirmation-required");
   function openLogin() {
     setLoginOpen(true);
   }
@@ -53,6 +53,7 @@ function App() {
   }
 
   useEffect(() => {
+    console.log("Status", status);
     switch (status) {
       case "login":
         toast("Login successfull.");
