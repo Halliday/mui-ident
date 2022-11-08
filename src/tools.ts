@@ -4,7 +4,7 @@
 
 import { AvatarProps, SxProps, Theme } from "@mui/material";
 import { SystemStyleObject } from "@mui/system";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 
 // see https://mui.com/material-ui/react-avatar/#BackgroundLetterAvatars.tsx
 export function stringAvatar(name: string): AvatarProps {
@@ -79,6 +79,12 @@ export function joinSx(a: SystemStyleObject<Theme>, b?: SxProps<Theme>): SxProps
     if (!b) return a;
     if (Array.isArray(b)) return [a, ...b];
     return [a, b as | SystemStyleObject<Theme> | ((theme: Theme) => SystemStyleObject<Theme>)];
+}
+
+export function useForceUpdate() {
+    const [n, setN] = useState(0);
+    const forceUpdate = useMemo(() => () => setN(n+1), [n]);
+    return forceUpdate;
 }
 
 // type GlobalStateKey = number;

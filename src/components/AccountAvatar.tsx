@@ -1,12 +1,12 @@
 import { Avatar, AvatarProps } from "@mui/material";
 import React from "react";
-import { useSession } from "../session";
+import { useSession, useUserinfo } from "../session";
 import { stringAvatar } from "../tools";
 
 export type MyAccountAvatarProps = AvatarProps;
 
-export const MyAccountAvatar = React.forwardRef(function MyAccountAvatar(props: MyAccountAvatarProps, ref: React.Ref<any>) {
-    const { userinfo, status: reason } = useSession();
+export const MyAccountAvatar: React.ComponentType<MyAccountAvatarProps> = React.forwardRef(function MyAccountAvatar(props: MyAccountAvatarProps, ref: React.Ref<any>) {
+    const userinfo = useUserinfo();
 
     let avatar: JSX.Element;
 
@@ -33,7 +33,7 @@ export interface AccountAvatarProps extends AvatarProps {
     picture?: string,
 }
 
-export const AccountAvatar = React.forwardRef(function AccountAvatar(props: AccountAvatarProps, ref: React.Ref<any>) {
+export const AccountAvatar: React.ComponentType<AccountAvatarProps> = React.forwardRef(function AccountAvatar(props: AccountAvatarProps, ref: React.Ref<any>) {
     const { name, picture, ...avatarProps } = props;
     let avatar: JSX.Element;
 

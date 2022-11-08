@@ -1,10 +1,10 @@
 
 import { api, defaultKey, getEmailHint, instructPasswordReset, loadSession, login, NewUser, register, resetPassword, Session, Status as IdentStatus, Userinfo } from "@halliday/ident";
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 export type SessionInteraction = "reset-password" | string;
 
-export type SessionStatus = IdentStatus | "register" | "logout" | "update-self" | "user-deleted" | "user-deletion-failed";
+export type SessionStatus = IdentStatus | "register" | "logout" | "user-deleted" | "user-deletion-failed";
 
 export type SessionDispatcher = (arg: [sess: Session | null, status: SessionStatus]) => void;
 
@@ -14,7 +14,7 @@ export class SessionWrapper {
         public readonly session: Session | null,
         public readonly status: SessionStatus,
         private readonly setSession: SessionDispatcher
-    ) {}
+    ) { }
 
     login = async (username: string, password: string) => {
         const [sess, status] = await login(username, password, this.sessionKey);
@@ -26,7 +26,7 @@ export class SessionWrapper {
         return this.session.userinfo;
     }
 
-    logout  = async () => {
+    logout = async () => {
         if (!this.session) return;
         try {
             await this.session.logout();
@@ -41,7 +41,7 @@ export class SessionWrapper {
         return getEmailHint();
     }
 
-    get requiresLogin()  {
+    get requiresLogin() {
         return this.status === "login-for-registration-required" || this.status === "login-for-email-confirmation-required";
     }
 
@@ -66,7 +66,6 @@ export class SessionWrapper {
     updateUser = async (u: api.UserUpdate) => {
         if (!this.session) throw new Error("Not logged in.");
         await this.session.updateSelf(u);
-        this.setSession([this.session, "update-self"]);
     }
 
     register = async (user: NewUser, password: string) => {
@@ -76,12 +75,12 @@ export class SessionWrapper {
         this.setSession([sess, "register"]);
     }
 
-    deleteUser = async() => {
+    deleteUser = async () => {
         if (!this.session) throw new Error("Not logged in.");
         this.session.delete();
         try {
             await this.session.deleteSelf();
-        } catch(err) {
+        } catch (err) {
             this.setSession([null, "user-deletion-failed"]);
             throw err;
         }
@@ -95,6 +94,18 @@ export function useSession(): SessionWrapper {
     return w;
 }
 
+export function useUserinfo(): Userinfo | null {
+    const { session } = useSession();
+    const [userinfo, setUserinfo] = useState<Userinfo | null>(session?.userinfo ?? null);
+    useEffect(() => {
+        return session?.use((ev) => {
+            if (ev.status === "userinfo")
+                setUserinfo(session.userinfo);
+        });
+    }, [session]);
+    return userinfo;
+}
+
 export interface SessionProviderProps {
     children: React.ReactNode;
     sessionKey?: string;
@@ -104,20 +115,10 @@ export interface SessionProviderProps {
 
 export const SessionContext = createContext<SessionWrapper | null>(null);
 
-// let sess: Promise<[sess: Session | null, status: IdentStatus]> | null;
-
 export function SessionProvider(props: SessionProviderProps) {
     const { sessionKey = defaultKey, defaultSession, defaultStatus, children } = props;
 
     const [[session, status], setSession] = useState<[Session | null, SessionStatus]>([defaultSession, defaultStatus]);
-
-    // useEffect(() => {
-    //     if (!sess) sess = loadSession(sessionKey);
-    //     sess.then(setSession, (err) => {
-    //         console.error("Error loading session:", err);
-    //         setSession([null, "loading-failed"]);
-    //     });
-    // }, [sessionKey]);
 
     const wrapper = useMemo(() => new SessionWrapper(sessionKey, session, status, setSession), [session, status]);
 

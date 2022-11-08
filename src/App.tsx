@@ -150,8 +150,7 @@ function MySession() {
     ["Scopes", session.scopes.join(", ")],
     ["Issued At", session.issuedAt.toLocaleString()],
     ["Expires At", session.expiresAt.toLocaleString()],
-    ["Id Token", session.idToken],
-    ["Userinfo", <ul>{Object.entries(session.userinfo).map(([k, v]) => (<li key={k}><strong>{k}:</strong> {JSON.stringify(v)}</li>))}</ul>],
+    ["Userinfo", <ul>{session.userinfo ? Object.entries(session.userinfo).map(([k, v]) => (<li key={k}><strong>{k}:</strong> {JSON.stringify(v)}</li>)) : "-"}</ul>],
   ];
   return <Container maxWidth="lg" sx={{ pt: "5vh" }}>
     <Typography variant="h2" gutterBottom>Session</Typography>
