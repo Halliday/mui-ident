@@ -1,12 +1,12 @@
 import { Avatar, AvatarProps } from "@mui/material";
 import React from "react";
-import { useSession, useUserinfo } from "../session";
+import { useUser } from "../session";
 import { stringAvatar } from "../tools";
 
 export type MyAccountAvatarProps = AvatarProps;
 
 export const MyAccountAvatar: React.ComponentType<MyAccountAvatarProps> = React.forwardRef(function MyAccountAvatar(props: MyAccountAvatarProps, ref: React.Ref<any>) {
-    const userinfo = useUserinfo();
+    const userinfo = useUser();
 
     let avatar: JSX.Element;
 

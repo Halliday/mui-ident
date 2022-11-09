@@ -5,9 +5,11 @@ import { ArrowBack, Close, CloseOutlined, EditOutlined, NavigateNextOutlined } f
 import { Alert, AlertTitle, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogProps, IconButton, InputAdornment, List, ListItemButton, ListItemIcon, ListItemText, Slide, SlideProps, Stack, styled, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
 import { L } from "@halliday/react-i18n";
-import { useSession } from "../session";
+// import { useSession } from "../session";
 import { MyAccountAvatar } from "./AccountAvatar";
 import { SelectLanguage } from "./Language";
+import ident from "@halliday/ident";
+import { useUser } from "../session";
 
 
 
@@ -49,7 +51,7 @@ export function MyProfilePanel(props: MyProfilePanelProps) {
     const [previousTab, setPreviousTab] = useState(props.defaultTab ?? "profile");
     const [tab, setTab] = useState<ProfilePanelTab>(props.defaultTab ?? "profile");
 
-    const { userinfo } = useSession();
+    const userinfo = useUser();
 
     const boxRef = React.useRef<HTMLElement>(null);
 
@@ -98,12 +100,13 @@ export function MyProfilePanel(props: MyProfilePanelProps) {
 const ProfileTab = React.forwardRef((props: TabProps, ref: React.Ref<HTMLDivElement>) => {
     const { onTabChange, onClose } = props;
     // const api = useAPI();
-    const { session, logout, userinfo, updateUser } = useSession();
+    // const { session, logout, userinfo, updateUser } = useSession();
+    const userinfo = useUser();
 
     const [editName, setEditName] = useState(false);
 
     function handleLogoutClick(ev: React.MouseEvent) {
-        logout();
+        ident.logout();
         onClose?.(ev, "logout");
     }
 
@@ -115,7 +118,7 @@ const ProfileTab = React.forwardRef((props: TabProps, ref: React.Ref<HTMLDivElem
                 title: "Change Displayname",
                 text: "Do you want to change your displayname?",
                 handleYes: () => {
-                    updateUser({ preferred_username }).then(() => {
+                    ident.session!.updateUser({ preferred_username }).then(() => {
                         // user.preferred_username = preferred_username;
                         // sess!.userinfo = user;
                         // sess!.store();
@@ -158,7 +161,12 @@ const ProfileTab = React.forwardRef((props: TabProps, ref: React.Ref<HTMLDivElem
                     </IconButton>
                 </Box>
             </Stack>
-            {!userinfo!.email_verified && <Alert severity="warning" sx={{ mb: 2 }}>{L("email_not_verified")}</Alert>}
+            {!userinfo!.email_verified && (
+                <Alert severity="warning" sx={{ mb: 2 }}>
+                    <Box sx={{mb: 1}}>{L("email_not_verified")}</Box>
+                    <Button size="small" color="inherit" sx={{mx: "-5px"}}>Resend Email</Button>
+                </Alert>
+            )}
             {
                 editName ? (
                     <Form id="preferred_username" onSubmit={preventDefault}>
@@ -240,13 +248,13 @@ const TabChangeEmail = React.forwardRef((props: TabProps, ref: React.Ref<HTMLDiv
     const [loading, setLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
 
-    const { instructEmailChange } = useSession();
+    // const { instructEmailChange } = useSession();
 
     const handleSubmit = async (ev: React.SyntheticEvent) => {
         ev.preventDefault();
         setLoading(true);
         try {
-            await instructEmailChange(newEmail);
+            await ident.instructEmailChange(newEmail);
         } catch (err) {
             reportError(err);
             return
@@ -290,14 +298,16 @@ const TabChangePassword = React.forwardRef((props: TabProps, ref: React.Ref<HTML
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(false);
 
-    const { userinfo, changePassword } = useSession();
+    const userinfo = useUser();
+
+    // const { userinfo, changePassword } = useSession();
 
     const handleSubmit = async (ev: React.SyntheticEvent) => {
         ev.preventDefault();
         setLoading(true);
         setErr(false);
         try {
-            await changePassword(oldPassword, newPassword);
+            await ident.session!.updatePassword(oldPassword, newPassword);
         } catch (err) {
             if (err instanceof RestError) {
                 if (err.code === 400) {
@@ -342,20 +352,19 @@ const TabChangePassword = React.forwardRef((props: TabProps, ref: React.Ref<HTML
 const TabDeleteAccount = React.forwardRef((props: TabProps, ref: React.Ref<HTMLDivElement>) => {
     const { onClose } = props;
     const [loading, setLoading] = useState(false);
-    const { deleteUser } = useSession();
 
     const handleSubmit = async (ev: React.SyntheticEvent) => {
         ev.preventDefault();
         setLoading(true);
         try {
-            await deleteUser();
+            await ident.session!.deleteUser();
         } catch (err) {
             reportError(err);
             return
         } finally {
             setLoading(false);
         }
-        toast(L("password_changed"));
+        toast(L("account_delete"));
         onClose?.({}, "user-deleted");
     }
 

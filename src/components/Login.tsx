@@ -1,9 +1,8 @@
-import { api, getEmailHint, instructPasswordReset, resetPassword, socialLoginUri } from "@halliday/ident";
+import ident, { api, IdentityEventType } from "@halliday/ident";
 import { ArrowBack, Close } from "@mui/icons-material";
 import { Alert, AlertTitle, BoxProps, Button, Dialog, DialogContent, DialogProps, IconButton, Link, Stack, styled, TextField, Typography, useTheme } from "@mui/material";
 import React, { useEffect, useState } from "react";
 // import { useLanguage } from "../i18n";
-import { useSession } from "../session";
 import { delay } from "../tools";
 import DividerWithLabel from "./DividerWithLabel";
 import { ErrorView } from "./ErrorView";
@@ -49,16 +48,17 @@ const emailRegExp = /\S+@\S+/;
 
 export interface LoginPanelProps extends BoxProps {
     onClose?: (ev: {}) => void;
+    reason?: IdentityEventType;
 }
 
 export function LoginPanel(props: LoginPanelProps) {
-    const { onClose } = props;
+    const { onClose, reason } = props;
 
     // const lang = useLanguage();
 
-    const { login, register, logout, status } = useSession();
+    // const { login, register, logout, status } = useSession();
 
-    const [tab, setTab] = useState<LoginPanelTab>(status === "password-reset-required" ? "complete-reset-password" : "login");
+    const [tab, setTab] = useState<LoginPanelTab>(reason === "password-reset-required" ? "complete-reset-password" : "login");
 
     function changeTab(tab: LoginPanelTab) {
         setTab(tab);
@@ -71,7 +71,7 @@ export function LoginPanel(props: LoginPanelProps) {
     const [resetted, setResetted] = useState(false);
     const [resetCompleted, setResetCompleted] = useState(false);
 
-    const [email, setEmail] = useState(getEmailHint() || "");
+    const [email, setEmail] = useState(ident.emailHint || "");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [username, setUsername] = useState("");
@@ -126,7 +126,7 @@ export function LoginPanel(props: LoginPanelProps) {
         setLoading(true);
 
         try {
-            await delay(login(email, password), d);
+            await delay(ident.login(email, password), d);
         } catch (err) {
             setLoading(false);
             setLoginError(err);
@@ -146,7 +146,7 @@ export function LoginPanel(props: LoginPanelProps) {
         }
         setLoading(true);
         try {
-            await delay(register({
+            await delay(ident.register({
                 locale: navigator.language,
                 email, preferred_username: username,
             }, password), d);
@@ -168,7 +168,7 @@ export function LoginPanel(props: LoginPanelProps) {
         }
         setLoading(true);
         try {
-            await delay(resetPassword(password), d);
+            await delay(ident.resetPassword(password), d);
         } catch (err) {
             setLoading(false);
             setResetCompleteError(err);
@@ -192,7 +192,7 @@ export function LoginPanel(props: LoginPanelProps) {
         setLoading(true);
 
         try {
-            await delay(instructPasswordReset(email), d);
+            await delay(ident.instructPasswordReset(email), d);
         } catch (err) {
             setLoading(false);
             setResetError(err);
@@ -208,16 +208,16 @@ export function LoginPanel(props: LoginPanelProps) {
     switch (tab) {
         case "login":
             body = <>
-                {
-                    status === "login-for-email-confirmation-required" && <Alert severity="info" sx={{ mb: 3 }}>
+                {reason === "login-for-email-confirmation-required" && (
+                    <Alert severity="info" sx={{ mb: 3 }}>
                         Please login to confirm your email address.
                     </Alert>
-                }
-                {
-                    status === "login-for-registration-required" && <Alert severity="info" sx={{ mb: 3 }}>
+                )}
+                {reason === "login-for-registration-required" && (
+                    <Alert severity="info" sx={{ mb: 3 }}>
                         Please login to confirm your email address.
                     </Alert>
-                }
+                )}
                 <Form id="login" sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, mb: 5 }}>
                     <TextField label="Email" id="email" autoComplete="email" autoFocus fullWidth value={email} onChange={ev => { setEmail(ev.target.value); }} disabled={loading} error={showErrors && emailError} helperText={emailHelperText} />
                     <TextField label="Password" id="password" type="password" autoComplete="current-password" fullWidth value={password} onChange={ev => { setPassword(ev.target.value); }} disabled={loading} />
@@ -228,7 +228,7 @@ export function LoginPanel(props: LoginPanelProps) {
                         You can now login with your new password.
                     </Alert>
                 }
-                {status === "logout" && (
+                {reason === "logout" && (
                     <Alert severity="info" sx={{ mb: 3 }}>
                         Logout successfull.
                     </Alert>
@@ -291,7 +291,7 @@ export function LoginPanel(props: LoginPanelProps) {
         case "complete-reset-password":
             body = <>
                 <Form id="complete-reset-password" sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, mb: 5 }}>
-                    <TextField label="Email" id="email" type="email" autoComplete="email" fullWidth disabled value={getEmailHint()} />
+                    <TextField label="Email" id="email" type="email" autoComplete="email" fullWidth disabled value={ident.emailHint} />
                     <TextField label="Password" id="new-password" type="password" autoComplete="new-password" fullWidth disabled={loading || resetCompleted} value={password} onChange={ev => { setPassword(ev.target.value); }} error={showErrors && passwordError} helperText={passwordHelperText} />
                     <TextField label="Confirm Password" id="confirm-new-password" type="password" autoComplete="new-password" fullWidth disabled={loading || resetCompleted} value={confirmPassword} onChange={ev => { setConfirmPassword(ev.target.value); }} error={showErrors && confirmPasswordError} helperText={confirmPasswordHelperText} />
                     {!resetCompleted && <LoadingButton size="large" variant="contained" disableElevation disabled={loading} loading={loading} onClick={handleResetPasswordClick}>Change Password</LoadingButton>}
@@ -333,7 +333,7 @@ function SignInWith() {
 function socialProvider(p: api.SocialProvider): React.ReactNode {
 
     async function performSocialLogin() {
-        window.location.href = socialLoginUri(p.iss);
+        window.location.href = ident.socialLoginUri(p.iss);
     }
 
     const props = {
