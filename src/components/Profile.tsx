@@ -5,7 +5,6 @@ import { ArrowBack, Close, CloseOutlined, EditOutlined, NavigateNextOutlined } f
 import { Alert, AlertTitle, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogProps, IconButton, InputAdornment, List, ListItemButton, ListItemIcon, ListItemText, Slide, SlideProps, Stack, styled, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
 import { L } from "@halliday/react-i18n";
-// import { useSession } from "../session";
 import { MyAccountAvatar } from "./AccountAvatar";
 import { SelectLanguage } from "./Language";
 import ident from "@halliday/ident";
@@ -99,8 +98,7 @@ export function MyProfilePanel(props: MyProfilePanelProps) {
 
 const ProfileTab = React.forwardRef((props: TabProps, ref: React.Ref<HTMLDivElement>) => {
     const { onTabChange, onClose } = props;
-    // const api = useAPI();
-    // const { session, logout, userinfo, updateUser } = useSession();
+
     const userinfo = useUser();
 
     const [editName, setEditName] = useState(false);
@@ -248,8 +246,6 @@ const TabChangeEmail = React.forwardRef((props: TabProps, ref: React.Ref<HTMLDiv
     const [loading, setLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
 
-    // const { instructEmailChange } = useSession();
-
     const handleSubmit = async (ev: React.SyntheticEvent) => {
         ev.preventDefault();
         setLoading(true);
@@ -299,8 +295,6 @@ const TabChangePassword = React.forwardRef((props: TabProps, ref: React.Ref<HTML
     const [err, setErr] = useState(false);
 
     const userinfo = useUser();
-
-    // const { userinfo, changePassword } = useSession();
 
     const handleSubmit = async (ev: React.SyntheticEvent) => {
         ev.preventDefault();

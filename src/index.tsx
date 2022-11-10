@@ -15,7 +15,10 @@ const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement
 );
 
-loadLanguage().then(() => {
+Promise.all([
+    ident.setup(),
+    loadLanguage()
+]).then(() => {
     root.render(
         <React.StrictMode>
             <LanguageGuard>

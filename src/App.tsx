@@ -1,13 +1,13 @@
-import { AppBar, Box, Button, CircularProgress, Container, createTheme, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Toolbar, Typography } from '@mui/material';
-import React, { useEffect, useMemo, useReducer, useState } from 'react';
-import { MyAccountAvatar } from './components/AccountAvatar';
-import { LoginDialog, LoginPanel } from './components/Login';
-import { MyProfileDialog, MyProfilePanel } from './components/Profile';
-// import { useSession } from './session';
+import ident, { IdentityEvent, IdentityEventType, Session } from '@halliday/ident';
 import { MsgBox } from "@halliday/mui-msgbox";
 import { toast } from "@halliday/mui-toast";
-import ident, { IdentityEvent, IdentityEventType, Session } from '@halliday/ident';
-// import { loadSession } from '@halliday/ident';
+import { AppBar, Box, Button, Container, createTheme, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Toolbar, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { MyAccountAvatar } from './components/AccountAvatar';
+import IdentityTools from './components/Identity';
+import { LoginDialog } from './components/Login';
+import { MyProfileDialog } from './components/Profile';
+import { useSession } from './session';
 
 
 const theme = createTheme({
@@ -34,108 +34,30 @@ const theme = createTheme({
     }
 });
 
+const identityEvents: IdentityEventType[] = [
+    "session-start", "session-end",
+    "login", "logout", "revoke",
+    "refresh", "userinfo",
+    "social-login", "social-login-error",
+    "register", "registration-error", "registration-complete", "login-for-registration-required",
+    "email-verify", "login-for-email-verify-required", "login-for-email-verify-required",
+    "password-reset-required",
+    // "unknown-token", "invalid-subject"
+];
+
+let unhandledIdentEvent: IdentityEvent | null = null;
+
+function handleIdentEvent(ev: IdentityEvent) {
+    unhandledIdentEvent = ev;
+}
+
+for (const ev of identityEvents) {
+    ident.addEventListener(ev, handleIdentEvent);
+}
+
 function App() {
 
-    const [session, setSession] = useState<Session | null>(ident.session);
-
-    function handleIdentEvent(ev: IdentityEvent) {
-        setSession(ident.session);
-
-        switch (ev.type) {
-            case "login":
-                toast("Login successfull.");
-                break;
-            case "logout":
-                toast("Logout successfull.");
-                break;
-            case "revoked":
-                toast("Sitzung wurde beended. Bitte erneut anmelden!");
-                break;
-            case "registration-completed":
-                MsgBox({
-                    title: "Registration completed",
-                    text: "Thanks for verifying your email address!",
-                });
-                break;
-            case "registered":
-                MsgBox({
-                    title: "Registration successfull",
-                    text: "Please check your email for a verification link.",
-                });
-                break;
-            case "registration-failed":
-                MsgBox({
-                    title: "Registration failed",
-                    text: "This link is probably expired or was already used. Please try again.",
-                });
-                break;
-            case "social-login":
-                toast("Login successfull.");
-                break;
-            case "social-login-failed":
-                MsgBox({
-                    title: "Login failed",
-                    text: "This link is probably expired or was already used. Please try again.",
-                });
-                break;
-            case "email-confirmed":
-                MsgBox({
-                    title: "Email verified",
-                    text: "Thanks for verifying your email address.",
-                });
-                break;
-            case "email-confirmation-failed":
-                MsgBox({
-                    title: "Email change failed",
-                    text: "This link is probably expired or was already used. Please try again.",
-                });
-                break;
-            case "password-reset-required":
-                setLoginOpen(true);
-                break;
-            case "login-for-registration-required":
-                setLoginOpen(true);
-                break;
-            case "login-for-email-confirmation-required":
-                setLoginOpen(true);
-                break;
-        }
-    }
-
-    useEffect(() => {
-        ident.setup();
-
-        const evs: IdentityEventType[] = [
-            "login", "logout", "revoked", "registered", "registration-failed",
-            "social-login", "social-login-failed", "email-confirmed", "email-confirmation-failed",
-            "password-reset-required", "login-for-registration-required", "login-for-email-confirmation-required",
-            "session-refresh", "session-userinfo"
-        ];
-        for (const ev of evs) {
-            ident.addEventListener(ev, handleIdentEvent);
-        }
-        return () => {
-            for (const ev of evs) {
-                ident.removeEventListener(ev, handleIdentEvent);
-            }
-        };
-    }, []);
-
-    // const [loginOpen, setLoginOpen] = useState(status === "password-reset-required" || status === "login-for-registration-required" || status === "login-for-email-confirmation-required");
-    const [loginOpen, setLoginOpen] = useState(false);
-    function openLogin() {
-        setLoginOpen(true);
-    }
-    function closeLogin() {
-        setLoginOpen(false);
-    }
-    const [profileOpen, setProfileOpen] = useState(false);
-    function openProfile() {
-        setProfileOpen(true);
-    }
-    function closeProfile() {
-        setProfileOpen(false);
-    }
+    const session = useSession();
 
     return (
         <ThemeProvider theme={theme}>
@@ -144,7 +66,10 @@ function App() {
                     <Container maxWidth="xl">
                         <Toolbar disableGutters>
                             <Typography variant="h1" sx={{ flexGrow: 1 }}>MUI Identity Demo</Typography>
-                            {session ? <MyAccountAvatar onClick={openProfile} sx={{ cursor: "pointer" }} /> : <Button variant="outlined" onClick={openLogin}>Login</Button>}
+                            {session ?
+                                <MyAccountAvatar onClick={window.openProfile} sx={{ cursor: "pointer" }} /> :
+                                <Button variant="outlined" onClick={window.openLogin}>Login</Button>
+                            }
                         </Toolbar>
                     </Container>
                 </AppBar>
@@ -157,10 +82,9 @@ function App() {
                         <Typography>This demo requires you to login by clicking the "Login" button at the top right corner.</Typography>
                     </Container>
                 )}
-
-                <MyProfileDialog open={profileOpen} onClose={closeProfile} />
-                <LoginDialog open={loginOpen} onClose={closeLogin} />
             </Box>
+
+            <IdentityTools />
         </ThemeProvider>
     );
 }
@@ -177,7 +101,7 @@ function MySession() {
             setSession(ident.session);
         }
         const evs: IdentityEventType[] = [
-            "login", "logout", "revoked"
+            "login", "logout", "revoke"
         ];
         for (const ev of evs) {
             ident.addEventListener(ev, handleSessionChange);
@@ -198,10 +122,8 @@ function MySession() {
         }
     }, [session]);
 
-    const forceUpdate = useForceUpdate();
-
     function refreshSession() {
-        session!.refresh().then(forceUpdate);
+        session!.refresh();
     }
 
     if (!session) return null;
@@ -243,9 +165,9 @@ function MySession() {
     </Container>
 }
 
-function useForceUpdate() {
-    const [value, setValue] = useState(0);
-    return useMemo(() => () => setValue(value + 1), [value]);
-}
+// function useForceUpdate() {
+//     const [value, setValue] = useState(0);
+//     return useMemo(() => () => setValue(value + 1), [value]);
+// }
 
 export default App;

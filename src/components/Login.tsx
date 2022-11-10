@@ -54,10 +54,6 @@ export interface LoginPanelProps extends BoxProps {
 export function LoginPanel(props: LoginPanelProps) {
     const { onClose, reason } = props;
 
-    // const lang = useLanguage();
-
-    // const { login, register, logout, status } = useSession();
-
     const [tab, setTab] = useState<LoginPanelTab>(reason === "password-reset-required" ? "complete-reset-password" : "login");
 
     function changeTab(tab: LoginPanelTab) {
@@ -208,7 +204,7 @@ export function LoginPanel(props: LoginPanelProps) {
     switch (tab) {
         case "login":
             body = <>
-                {reason === "login-for-email-confirmation-required" && (
+                {reason === "login-for-email-verify-required" && (
                     <Alert severity="info" sx={{ mb: 3 }}>
                         Please login to confirm your email address.
                     </Alert>
