@@ -84,7 +84,6 @@ function App() {
                 )}
             </Box>
 
-            <IdentityTools />
         </ThemeProvider>
     );
 }

@@ -12,3 +12,5 @@ export type { DividerWithLabelProps } from "./components/DividerWithLabel";
 
 export { default as LoadingButton } from "./components/LoadingButton";
 export type { LoadingButtonProps } from "./components/LoadingButton";
+
+export * from "./components/Identity";
