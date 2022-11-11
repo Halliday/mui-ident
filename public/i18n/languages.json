@@ -1,0 +1,15 @@
+[
+    {
+        "code": "en-US",
+        "name": "English",
+        "nativeName": "English",
+        "country": "United States",
+        "flag": "data:image/svg+xml;base64, PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3NDEwIDM5MDAiPg0KCTxwYXRoIGQ9Ik0wIDBoNzQxMHYzOTAwSDB6IiBzdHlsZT0iZmlsbDojYjIyMjM0Ii8+DQoJPHBhdGggZD0iTTAgNDUwaDc0MTBtMCA2MDBIMG0wIDYwMGg3NDEwbTAgNjAwSDBtMCA2MDBoNzQxMG0wIDYwMEgwIiBzdHlsZT0ic3Ryb2tlOiNmZmY7c3Ryb2tlLXdpZHRoOjMwMCIgLz4NCgk8cGF0aCBkPSJNMCAwaDI5NjR2MjEwMEgweiIgc3R5bGU9ImZpbGw6IzNjM2I2ZSIvPg0KPC9zdmc+"
+    }, {
+        "code": "de-DE",
+        "name": "German",
+        "nativeName": "Deutsch",
+        "country": "Deutschland",
+        "flag": "data:image/svg+xml;base64, PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1IDMiPg0KCTxwYXRoIGQ9Ik0wIDBoNXYzSDB6IiAvPg0KCTxwYXRoIGZpbGw9IiNEMDAiIGQ9Ik0wIDFoNXYySDB6IiAvPg0KCTxwYXRoIGZpbGw9IiNGRkNFMDAiIGQ9Ik0wIDJoNXYxSDB6IiAvPg0KPC9zdmc+"
+    }
+]
