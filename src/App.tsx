@@ -1,12 +1,7 @@
-import ident, { IdentityEvent, IdentityEventType, Session } from '@halliday/ident';
-import { MsgBox } from "@halliday/mui-msgbox";
-import { toast } from "@halliday/mui-toast";
+import ident, { IdentityEventType, Session } from '@halliday/ident';
 import { AppBar, Box, Button, Container, createTheme, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Toolbar, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { MyAccountAvatar } from './components/AccountAvatar';
-import IdentityTools from './components/Identity';
-import { LoginDialog } from './components/Login';
-import { MyProfileDialog } from './components/Profile';
 import { useSession } from './session';
 
 
@@ -33,27 +28,6 @@ const theme = createTheme({
         },
     }
 });
-
-const identityEvents: IdentityEventType[] = [
-    "session-start", "session-end",
-    "login", "logout", "revoke",
-    "refresh", "userinfo",
-    "social-login", "social-login-error",
-    "register", "registration-error", "registration-complete", "login-for-registration-required",
-    "email-verify", "login-for-email-verify-required", "login-for-email-verify-required",
-    "password-reset-required",
-    // "unknown-token", "invalid-subject"
-];
-
-let unhandledIdentEvent: IdentityEvent | null = null;
-
-function handleIdentEvent(ev: IdentityEvent) {
-    unhandledIdentEvent = ev;
-}
-
-for (const ev of identityEvents) {
-    ident.addEventListener(ev, handleIdentEvent);
-}
 
 function App() {
 
@@ -94,13 +68,15 @@ function MySession() {
         ident.logout();
     }
 
-    const [session, setSession] = useState<Session | null>(ident.session);
+    // we use the reference to the session object here, as we want to re-render on
+    // changes to the session's scope (the session object is the same)
+    const [{ session }, setSession] = useState<{ session: Session | null }>({ session: ident.session });
     useEffect(() => {
         function handleSessionChange() {
-            setSession(ident.session);
+            setSession({ session: ident.session });
         }
         const evs: IdentityEventType[] = [
-            "login", "logout", "revoke"
+            "session", "refresh", "userinfo",
         ];
         for (const ev of evs) {
             ident.addEventListener(ev, handleSessionChange);
@@ -111,15 +87,6 @@ function MySession() {
             }
         };
     }, []);
-    useEffect(() => {
-        function handleSessionRefresh() {
-
-        }
-        if (session) {
-            session.addEventListener("refresh", handleSessionRefresh);
-            return () => session.removeEventListener("refresh", handleSessionRefresh);
-        }
-    }, [session]);
 
     function refreshSession() {
         session!.refresh();

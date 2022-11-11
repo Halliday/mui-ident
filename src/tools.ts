@@ -1,10 +1,8 @@
 
 
-// Generates props for a MUI Avatar based on a avatar name. 
-
 import { AvatarProps, SxProps, Theme } from "@mui/material";
 import { SystemStyleObject } from "@mui/system";
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 // see https://mui.com/material-ui/react-avatar/#BackgroundLetterAvatars.tsx
 export function stringAvatar(name: string): AvatarProps {

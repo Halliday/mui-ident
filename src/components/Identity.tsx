@@ -6,14 +6,13 @@ import { LoginDialog } from "./Login";
 import { MyProfileDialog } from "./Profile";
 
 const identityEvents: IdentityEventType[] = [
-    "session-start", "session-end",
+    "session",
     "login", "logout", "revoke",
     "refresh", "userinfo",
     "social-login", "social-login-error",
     "register", "registration-error", "registration-complete", "login-for-registration-required",
     "email-verify", "login-for-email-verify-required", "login-for-email-verify-required",
     "password-reset-required",
-    // "unknown-token", "invalid-subject"
 ];
 
 let unhandledIdentEvent: IdentityEvent | null = null;

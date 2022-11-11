@@ -9,7 +9,7 @@ export function useUser(): Userinfo | null {
             setUser(ident.user);
         }
         const evs: IdentityEventType[] = [
-            "session-start", "session-end", "userinfo"
+            "session", "userinfo"
         ];
         for (const ev of evs) {
             ident.addEventListener(ev, handleIdentEvent);
@@ -29,16 +29,9 @@ export function useSession(): Session | null {
         function handleIdentEvent() {
             setSession(ident.session);
         }
-        const evs: IdentityEventType[] = [
-            "session-start", "session-end"
-        ];
-        for (const ev of evs) {
-            ident.addEventListener(ev, handleIdentEvent);
-        }
+        ident.addEventListener("session", handleIdentEvent);
         return () => {
-            for (const ev of evs) {
-                ident.removeEventListener(ev, handleIdentEvent);
-            }
+            ident.removeEventListener("session", handleIdentEvent);
         };
     });
     return session;
