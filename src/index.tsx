@@ -7,7 +7,6 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import IdentityTools from "./components/Identity";
 import "./index.css";
-// import { SessionProvider } from './session';
 
 identApi.config.baseUrl = "http://localhost/";
 
